@@ -17,9 +17,6 @@ param developmentWorkstationsSubnetName string
 ])
 param roleAccessRightsPermission string
 
-// @description('The name of the new policy set instance to be created')
-// param policySetParent string
-
 param vnetResourceID string = '${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.Network/virtualNetworks/${labVirtualNetworkName}'
 param subNetResourceID string = '${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.Network/virtualNetworks/${labVirtualNetworkName}/subnets/${developmentWorkstationsSubnetName}'
 
@@ -130,12 +127,9 @@ resource labsPublicRepo 'microsoft.devtestlab/labs/artifactsources@2018-09-15' =
   }
 }
 
-resource policySetParent 'Microsoft.DevTestLab/labs/policysets@2018-09-15' = {
+resource policySetParent 'Microsoft.DevTestLab/labs/policysets@2018-09-15' existing = {
   parent: lab
-  name: 'policySetParent'
-  location: location
-  properties: {
-  }
+  name: 'default'
 }
 
 resource allowedVmSizesPolicies 'Microsoft.DevTestLab/labs/policysets/policies@2018-09-15' = {
@@ -146,7 +140,7 @@ resource allowedVmSizesPolicies 'Microsoft.DevTestLab/labs/policysets/policies@2
     evaluatorType: 'AllowedValuesPolicy'
     factName: 'LabVmSize'
     status: 'Enabled'
-    threshold: 'Standard_D4_v3,Standard_E4_v4'
+    threshold: '["Standard_D4_v3","Standard_E4_v4"]'
     }
   }
 

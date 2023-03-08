@@ -13,7 +13,7 @@ param virtualMachinesSubnetName string
 @description('The access rights to be granted to the user when provisioning an environment')
 @allowed([
   'Contributor'
-  'Reader'
+  'Reader' 
 ])
 param roleAccessRightsPermission string
 
@@ -152,13 +152,9 @@ resource labsPublicRepo 'microsoft.devtestlab/labs/artifactsources@2018-09-15' =
   }
 }
 
-resource policySetParent 'Microsoft.DevTestLab/labs/policysets@2018-09-15' = {
+resource policySetParent 'Microsoft.DevTestLab/labs/policysets@2018-09-15' existing = {
   parent: lab
-  name: 'policySetParent'
-  location: location
-  properties: {
-    
-  }
+  name: 'default'
 }
 
 resource allowedVmSizesPolicies 'Microsoft.DevTestLab/labs/policysets/policies@2018-09-15' = {
@@ -169,7 +165,7 @@ resource allowedVmSizesPolicies 'Microsoft.DevTestLab/labs/policysets/policies@2
     evaluatorType: 'AllowedValuesPolicy'
     factName: 'LabVmSize'
     status: 'Enabled'
-    threshold: 'Standard_D2_v3, Standard_D4_v3, Standard_D8_v3, Standard_E2_v4, Standard_E4_v4, Standard_E8_v4'
+    threshold: '["Standard_D2_v3","Standard_D4_v3","Standard_D8_v3","Standard_E2_v4","Standard_E4_v4","Standard_E8_v4"]'
     }
   }
 
