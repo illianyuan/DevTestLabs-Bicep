@@ -4,6 +4,9 @@ param labName string
 @description('Location for all resources.')
 param location string = resourceGroup().location
 
+@description('Development vnet resourcegroup name')
+param developmentVNetRGName string
+
 @description('Name of the lab virtual network resource')
 param labVirtualNetworkName string
 
@@ -17,8 +20,8 @@ param virtualMachinesSubnetName string
 ])
 param roleAccessRightsPermission string
 
-param vnetResourceID string = '${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.Network/virtualNetworks/${labVirtualNetworkName}'
-param subNetResourceID string = '${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.Network/virtualNetworks/${labVirtualNetworkName}/subnets/${virtualMachinesSubnetName}'
+param vnetResourceID string = '${subscription().id}/resourceGroups/${developmentVNetRGName}/providers/Microsoft.Network/virtualNetworks/${labVirtualNetworkName}'
+param subNetResourceID string = '${subscription().id}/resourceGroups/${developmentVNetRGName}/providers/Microsoft.Network/virtualNetworks/${labVirtualNetworkName}/subnets/${virtualMachinesSubnetName}'
 
 resource lab 'Microsoft.DevTestLab/labs@2018-09-15' = {
   name: labName
@@ -178,6 +181,18 @@ resource allowedVmsPerLabPolicies 'Microsoft.DevTestLab/labs/policysets/policies
     factName: 'LabVmCount'
     status: 'Enabled'
     threshold: '20'
+    }
+  }
+
+resource allowedPremiumSSDPerLabPolicies 'Microsoft.DevTestLab/labs/policysets/policies@2018-09-15' = {
+  name: 'allowedPremiumSSDPerLabPolicy'
+  location: location
+  parent: policySetParent
+  properties: {
+     evaluatorType: 'MaxValuePolicy'
+     factName: 'LabPremiumVmCount'
+     status: 'Enabled'
+     threshold: '40'
     }
   }
 

@@ -4,6 +4,9 @@ param labName string
 @description('Location for all resources.')
 param location string = resourceGroup().location
 
+@description('Development vnet resourcegroup name')
+param developmentVNetRGName string
+
 @description('Name of the lab virtual network resource')
 param labVirtualNetworkName string
 
@@ -17,8 +20,8 @@ param developmentWorkstationsSubnetName string
 ])
 param roleAccessRightsPermission string
 
-param vnetResourceID string = '${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.Network/virtualNetworks/${labVirtualNetworkName}'
-param subNetResourceID string = '${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.Network/virtualNetworks/${labVirtualNetworkName}/subnets/${developmentWorkstationsSubnetName}'
+param vnetResourceID string = '${subscription().id}/resourceGroups/${developmentVNetRGName}/providers/Microsoft.Network/virtualNetworks/${labVirtualNetworkName}'
+param subNetResourceID string = '${subscription().id}/resourceGroups/${developmentVNetRGName}/providers/Microsoft.Network/virtualNetworks/${labVirtualNetworkName}/subnets/${developmentWorkstationsSubnetName}'
 
 resource lab 'Microsoft.DevTestLab/labs@2018-09-15' = {
   name: labName
@@ -144,16 +147,41 @@ resource allowedVmSizesPolicies 'Microsoft.DevTestLab/labs/policysets/policies@2
     }
   }
 
-  resource allowedVmsPerUserPolicies 'Microsoft.DevTestLab/labs/policysets/policies@2018-09-15' = {
-    name: 'allowedVmsPerUserPolicy'
-    location: location
-    parent: policySetParent
-    properties: {
+resource allowedVmsPerUserPolicies 'Microsoft.DevTestLab/labs/policysets/policies@2018-09-15' = {
+  name: 'allowedVmsPerUserPolicy'
+  location: location
+  parent: policySetParent
+  properties: {
+    evaluatorType: 'MaxValuePolicy'
+    factName: 'UserOwnedLabVmCount'
+    status: 'Enabled'
+    threshold: '2'
+     }
+  }
+
+resource allowedPremiumSSDPerUserPolicies 'Microsoft.DevTestLab/labs/policysets/policies@2018-09-15' = {
+   name: 'allowedPremiumSSDPerUserPolicy'
+   location: location
+   parent: policySetParent
+   properties: {
       evaluatorType: 'MaxValuePolicy'
-      factName: 'UserOwnedLabVmCount'
+      factName: 'UserOwnedLabPremiumVmCount'
       status: 'Enabled'
       threshold: '2'
-      }
     }
+  }
 
+// resource allowedMarketplaceImagesPolicies 'Microsoft.DevTestLab/labs/policysets/policies@2018-09-15' = {
+//    name: 'allowedMarketplaceImagesPolicy'
+//    location: location
+//    parent: policySetParent
+//    properties: {
+//       evaluatorType: 'AllowedValuesPolicy'
+//       factName: 'GalleryImage'
+//       status: 'Disabled'
+//       threshold: '["offer":"CentOS","publisher":"Rogue Wave Software","sku":"7.9","osType":"Linux","version":"latest"]'
+//       }
+//     }
+    
 output labId string = lab.id
+ 
